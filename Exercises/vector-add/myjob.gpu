@@ -1,0 +1,6 @@
+#!/bin/bash
+#SBATCH -t 1:00
+#SBATCH -n 1 
+#SBATCH -p gpu_short 
+cd $HOME/HPC_GPU_2k18/vector-add
+srun ./vector-add
