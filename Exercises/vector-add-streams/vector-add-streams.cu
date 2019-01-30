@@ -25,19 +25,25 @@ static void checkCudaCall(cudaError_t result) {
 }
 
 
-__global__ void vectorAddKernel(float* A, float* B, float* Result) {
-// insert operation here
-
+__global__ void vectorAddKernel(float* A, float* B, float* Result, int n) {
+    int threadId = threadIdx.x;
+    int blockId = blockIdx.x;
+    int width = blockDim.x;
+    int pos = blockId * width + threadId; 
+    if (pos < n) {
+        Result[pos] = A[pos] + B[pos];
+    }
 }
 
 void vectorAddCuda(int n, float* a, float* b, float* result) {
     int threadBlockSize = 512;
 
-
-cudaStream_t stream[8];
-int nStreams=4;
-for (int i=0; i<nStreams; i++) checkCudaCall(cudaStreamCreate(&stream[i]));
-//result = cudaStreamDestroy(stream1)
+    cudaStream_t stream[8];
+    int nStreams=4;
+    for (int i=0; i<nStreams; i++) {
+        checkCudaCall(cudaStreamCreate(&stream[i]));
+    }
+    //result = cudaStreamDestroy(stream1)
 
     // allocate the vectors on the GPU
     float* deviceA = NULL;
@@ -66,34 +72,31 @@ for (int i=0; i<nStreams; i++) checkCudaCall(cudaStreamCreate(&stream[i]));
     timer memoryTime = timer("memoryTime");
     timer cudaTime = timer("CUDATime");
 
-int streamSize=n/nStreams;
+    int streamSize=n/nStreams;
 
     cudaTime.start();
-for (int i = 0; i < nStreams; ++i) {
-  int offset = i * streamSize;
-    // copy the original vectors to the GPU
-    memoryTime.start();
-//    checkCudaCall(cudaMemcpy(deviceA, a, n*sizeof(float), cudaMemcpyHostToDevice));
-//    checkCudaCall(cudaMemcpy(deviceB, b, n*sizeof(float), cudaMemcpyHostToDevice));
-    checkCudaCall(cudaMemcpyAsync(deviceA, a+offset, streamSize*sizeof(float), cudaMemcpyHostToDevice, stream[i]));
-    checkCudaCall(cudaMemcpyAsync(deviceB, b+offset, streamSize*sizeof(float), cudaMemcpyHostToDevice, stream[i]));
-    memoryTime.stop();
+    for (int i = 0; i < nStreams; ++i) {
+        int offset = i * streamSize;
+        // copy the original vectors to the GPU
+        memoryTime.start();
+        cudaMemcpyAsync(deviceA, a+offset, streamSize*sizeof(float), cudaMemcpyHostToDevice, stream[i]);
+        cudaMemcpyAsync(deviceB, b+offset, streamSize*sizeof(float), cudaMemcpyHostToDevice, stream[i]);
+        memoryTime.stop();
 
-    // execute kernel
-    kernelTime1.start();
-//    vectorAddKernel<<<n/threadBlockSize, threadBlockSize>>>(deviceA, deviceB, deviceResult);
-    vectorAddKernel<<<n/threadBlockSize, threadBlockSize, 0, stream[i]>>>(deviceA, deviceB, deviceResult);
+        kernelTime1.start();
+        vectorAddKernel<<<n/threadBlockSize+1, threadBlockSize, 0, stream[i]>>>(deviceA, deviceB, deviceResult, n);
+        cudaDeviceSynchronize();
+        kernelTime1.stop();
+
+        // check whether the kernel invocation was successful
+        checkCudaCall(cudaGetLastError());
+
+        // copy result back
+        memoryTime.start();
+        cudaMemcpyAsync(result+offset, deviceResult, streamSize * sizeof(float), cudaMemcpyDeviceToHost, stream[i]);
+        memoryTime.stop();
+    }
     cudaDeviceSynchronize();
-    kernelTime1.stop();
-
-    // check whether the kernel invocation was successful
-    checkCudaCall(cudaGetLastError());
-
-    // copy result back
-    memoryTime.start();
-    checkCudaCall(cudaMemcpyAsync(result+offset, deviceResult, streamSize * sizeof(float), cudaMemcpyDeviceToHost, stream[i]));
-    memoryTime.stop();
-}
     cudaTime.stop();
     checkCudaCall(cudaFree(deviceA));
     checkCudaCall(cudaFree(deviceB));
@@ -120,7 +123,8 @@ int vectorAddSeq(int n, float* a, float* b, float* result) {
 }
 
 int main(int argc, char* argv[]) {
-    int n = 655360;
+    int n = 1024*1024*512;
+    for (int i=0; i<5; i++) {
     float* a = new float[n];
     float* b = new float[n];
     float* result = new float[n];
@@ -162,6 +166,6 @@ cout << "Overall CUDA: \t\t" << cudaTime << endl;
     delete[] a;
     delete[] b;
     delete[] result;
-    
+    }
     return 0;
 }

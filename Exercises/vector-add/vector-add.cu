@@ -25,9 +25,14 @@ static void checkCudaCall(cudaError_t result) {
 }
 
 
-__global__ void vectorAddKernel(float* A, float* B, float* Result) {
-// insert operation here
-
+__global__ void vectorAddKernel(float* A, float* B, float* Result, int n) {
+    int threadId = threadIdx.x;
+    int blockId = blockIdx.x;
+    int width = blockDim.x;
+    int pos = blockId * width + threadId; 
+    if (pos < n) {
+        Result[pos] = A[pos] / B[pos];
+    }
 }
 
 void vectorAddCuda(int n, float* a, float* b, float* result) {
@@ -67,7 +72,7 @@ void vectorAddCuda(int n, float* a, float* b, float* result) {
 
     // execute kernel
     kernelTime1.start();
-    vectorAddKernel<<<n/threadBlockSize, threadBlockSize>>>(deviceA, deviceB, deviceResult);
+    vectorAddKernel<<<n/threadBlockSize+1, threadBlockSize>>>(deviceA, deviceB, deviceResult, n);
     cudaDeviceSynchronize();
     kernelTime1.stop();
 
@@ -95,16 +100,24 @@ int vectorAddSeq(int n, float* a, float* b, float* result) {
   
   sequentialTime.start();
   for (i=0; i<n; i++) {
-	result[i] = a[i]+b[i];
+	result[i] = a[i]/b[i];
   }
   sequentialTime.stop();
   
-  cout << "vector-add (sequential): \t\t" << sequentialTime << endl;
-
+  cout << "vector-add (sequential): \t" << sequentialTime << endl;
+  return 1;
 }
 
 int main(int argc, char* argv[]) {
-    int n = 655360;
+    int ns[] = {256, 1024, 65536, 655360, 1000000};
+    //int n = 256;
+    //int n = 1024;
+    //int n = 65536;
+    //int n = 655360;
+    //int n = 1000000;
+    int n = 1024*1024*512;
+    for (int i=0; i<5; i++) {
+    int nb = ns[i];
     float* a = new float[n];
     float* b = new float[n];
     float* result = new float[n];
@@ -115,8 +128,8 @@ int main(int argc, char* argv[]) {
     cout << "Adding two vectors of " << n << " integer elements." << endl;
     // initialize the vectors.
     for(int i=0; i<n; i++) {
-        a[i] = i;
-        b[i] = i;
+        a[i] = i+1;
+        b[i] = i+1;
     }
 
     vectorAddSeq(n, a, b, result_s);
@@ -135,6 +148,6 @@ int main(int argc, char* argv[]) {
     delete[] a;
     delete[] b;
     delete[] result;
-    
+    }
     return 0;
 }

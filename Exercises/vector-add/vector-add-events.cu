@@ -25,10 +25,15 @@ static void checkCudaCall(cudaError_t result) {
 }
 
 
-__global__ void vectorAddKernel(float* A, float* B, float* Result) {
-// code here!
+__global__ void vectorAddKernel(float* A, float* B, float* Result, int n) {
+    int threadId = threadIdx.x;
+    int blockId = blockIdx.x;
+    int width = blockDim.x;
+    int pos = blockId * width + threadId; 
+    if (pos < n) {
+        Result[pos] = A[pos] + B[pos];
+    }
 }
-
 
 void vectorAddCuda(int n, float* a, float* b, float* result) {
     int threadBlockSize = 512;
@@ -66,7 +71,7 @@ void vectorAddCuda(int n, float* a, float* b, float* result) {
 
     // execute kernel
     cudaEventRecord(start, 0);
-    vectorAddKernel<<<n/threadBlockSize, threadBlockSize>>>(deviceA, deviceB, deviceResult);
+    vectorAddKernel<<<n/threadBlockSize+1, threadBlockSize>>>(deviceA, deviceB, deviceResult, n);
     cudaEventRecord(stop, 0);
 
     // check whether the kernel invocation was successful
@@ -88,7 +93,15 @@ void vectorAddCuda(int n, float* a, float* b, float* result) {
 
 
 int main(int argc, char* argv[]) {
-    int n = 65536;
+    int ns[] = {256, 1024, 65536, 655360, 1000000};
+    //int n = 256;
+    //int n = 1024;
+    //int n = 65536;
+    //int n = 655360;
+    //int n = 1000000;
+    int n = 1024*1024*512;
+    for (int i=0; i<5; i++) {
+    int nb = ns[i];
     timer vectorAddTimer("vector add timer");
     float* a = new float[n];
     float* b = new float[n];
