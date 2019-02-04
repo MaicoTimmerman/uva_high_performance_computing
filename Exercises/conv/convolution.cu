@@ -8,6 +8,7 @@ extern "C" {
 }
 
 int compare_arrays(float *c, float *d, int n);
+void print_matrix(float *c, int d, int n);
 
 
 #define image_height 1024
@@ -16,7 +17,7 @@ int compare_arrays(float *c, float *d, int n);
 #define filter_width 17
 
 #define block_size_x 32
-#define block_size_y 32
+#define block_size_y 16
 
 #define border_height ((filter_height/2)*2)
 #define border_width ((filter_width/2)*2)
@@ -142,6 +143,15 @@ __global__ void convolution_kernel(float *output, float *input, float *filter, u
     }
 }
 
+void print_matrix(float *image, int width, int height) {
+    for (int row=0; row <height; row++) {
+        for(int columns=0; columns<width; columns++) {
+            printf("%01d ", int(image[row * width + columns]));
+        }
+        printf("\n");
+    }
+}
+
 int main() {
 
     float time;
@@ -154,11 +164,22 @@ int main() {
     float *output2 = (float *) malloc(image_height * image_width * sizeof(float));
     float *filter = (float *) malloc(filter_height * filter_width * sizeof(float));
     for (int i=0; i< input_height * input_width; i++) {
-        input[i] = 1.0 / rand();
+        /* input[i] = 1.0 / rand(); */
+        input[i] = 0;
     }
+
+    /* input[int(ceil(image_height / 2) * image_width + ceil(image_width / 2))] = 1; */
+    input[1*image_width+1] = 1;
     for (int i=0; i< filter_height * filter_width; i++) {
-        filter[i] = 1.0 / rand();
+        input[i] = 1.0 / rand();
+        /* filter[i] = 1; */
     }
+
+    /* printf("Image\n"); */
+    /* print_matrix(input, image_width, image_height); */
+    /* printf("Filter\n"); */
+    /* print_matrix(filter, filter_width, filter_height); */
+
     memset(output1, 0, image_height * image_width * sizeof(float));
     memset(output2, 0, image_height * image_width * sizeof(float));
 
@@ -167,6 +188,9 @@ int main() {
     convolve(output1, input, filter);
     stop_timer(&time);
     printf("convolution sequential took \t\t %.3f ms\n", time);
+
+    /* printf("Output sequential\n"); */
+    /* print_matrix(output1, image_width, image_height); */
 
     //allocate GPU memory
     float *d_input; float *d_output; float *d_filter;
@@ -268,8 +292,14 @@ int main() {
 
     dim3 threads2(block_size_x, block_size_y);
     //problem size divided by thread block size rounded up
-    dim3 grid2(int(ceilf(image_width/((float)threads.x - filter_width - 1))),
-            int(ceilf(image_height/((float)threads.y - filter_height - 1))));
+    /* printf("blocksize x %d\n", block_size_x); */
+    /* printf("blocksize y %d\n", block_size_y); */
+    /* printf("denom x %f\n", ((float)threads.x - filter_width - 1)); */
+    /* printf("denom y %f\n", ((float)threads.y - filter_height - 1)); */
+    /* printf("grid x %d\n", int(ceilf(image_width/((float)threads.x - (filter_width / 2) - 1)))); */
+    /* printf("grid y %d\n", int(ceilf(image_height/((float)threads.y - (filter_height / 2) - 1)))); */
+    dim3 grid2(int(ceilf(image_width/((float)threads.x - (filter_width / 2) - 1))),
+            int(ceilf(image_height/((float)threads.y - (filter_height / 2) - 1))));
 
     start_timer();
     convolution_kernel<<<grid2, threads2>>>(d_output, d_input, d_filter, d_counter);
@@ -298,6 +328,8 @@ int main() {
     }
 
     printf("convolution_kernel_shared_mem coutner \t\t %d\n", counter);
+    printf("output shared memory\n");
+    /* print_matrix(output2, image_width, image_height); */
     //debug
     /* for (int i = 0; i < image_height*image_width; ++i) { */
     /*     if (output2[i] > 0.0f) */
