@@ -177,4 +177,65 @@ are advancing quickly.
 
 
 \section*{The Pathologies of Big Data}
+The author of this piece is concerned with answering the question: When is data
+“big”? The author addresses it indirectly by explaining the limits that are 
+encountered as data scales up, and ultimately answers the question in those 
+terms. Here follows a paraphrased summary which contains some free 
+interpretation:
+
+A dataset containing basic demographic data on every person in the world adds 
+up to about 100GB. Answering questions about the whole dataset at once is still
+doable on a basic consumer-grade computer within reasonable time, so is it not 
+big? Storing the dataset in a PostgreSQL database increased the used disk space
+linearly (usually not a problem) and revealed one of the ‘pathologies’ of big 
+data: the scaling of algorithms for data analysis. 
+
+Up to the order of thousands, PostgreSQL uses a fast hash table. Beyond that, 
+it resorts to sorting by grouping column, which is fine up to the order of 
+millions, but it does not scale well up to billions. Transactions concerning a 
+handful of items (the typical use case) are still handled with ease in such 
+large databases, but a simple query on 1 billion items took more than 24 hours 
+to complete! When asking questions about truly large datasets, such as in data 
+warehouses, you must think about how to suitably store it to allow interesting 
+questions to be answered in reasonable time.
+
+In big data, there are typically many more observations than things that are 
+being observed, i.e. the cardinality is low. For example, each phone’s 
+location is tracked thousands of times a day. Asking questions about time 
+series like this does not scale well in relational databases, as they assume 
+that all observations are independent.
+
+One aspect that makes data big is when it severely punishes inefficient access 
+patterns. Another one is that it may run into hard limits imposed by software 
+(e.g. limited memory address space) or hardware (e.g. limited memory). Single 
+computers generally can’t be scaled up more than a magnitude compared to 
+consumer grade machines – there’s only so much memory that can fit into one 
+computer – so the only practical scaling method is through distributed 
+computing. This introduces the network as another bottlenecking layer, 
+although networks are generally faster than disk storage in bandwidth and 
+latency. Distributed computing only truly scales when a problem can be split 
+up into equally sized, independent parts. When the parts are not equally 
+sized, the slowest part determines the performance. When parts are not 
+independent, communication over networks incur a lot of overhead.
+
+A dataset can then be defined as large enough to cause performance problems 
+when no careful thought is put into how to store, access and use it. That means
+this definition changes with time as computers and software become faster and 
+more intelligent.
+
+
+
+Despite being written almost ten years ago, this piece is still just as relevant 
+today. The author’s points on scalability of data-driven applications and 
+computers still stand, although Optane storage may soon dramatically increase 
+capacity of high performance memory capacity. Funnily enough, even his examples 
+of ‘current day’ computers from that time don’t seem outdated, as computers 
+since then have scaled mostly in terms of parallel processing instead of raw 
+speed. It’s hard to say if database software has adapted to deal with 
+scalability to billions, but modern solutions have surely improved as big data 
+has become a commonplace application as internet usage and availability of large 
+datasets has grown enormously in the past ten years.
+
+
+
 \end{document}
