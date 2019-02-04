@@ -1,0 +1,180 @@
+\documentclass{article}
+
+% if you need to pass options to natbib, use, e.g.:
+% \PassOptionsToPackage{numbers, compress}{natbib}
+% before loading nips_2018
+
+% ready for submission
+\usepackage[final]{nips_2018}
+
+% to compile a preprint version, e.g., for submission to arXiv, add
+% add the [preprint] option:
+% \usepackage[preprint]{nips_2018}
+
+% to compile a camera-ready version, add the [final] option, e.g.:
+% \usepackage[final]{nips_2018}
+
+% to avoid loading the natbib package, add option nonatbib:
+% \usepackage[nonatbib]{nips_2018}
+
+\usepackage[utf8]{inputenc} % allow utf-8 input
+\usepackage[T1]{fontenc}    % use 8-bit T1 fonts
+\usepackage{hyperref}       % hyperlinks
+\usepackage{url}            % simple URL typesetting
+\usepackage{graphicx, multicol} % Enhanced support for graphics
+\usepackage{xcolor} % Driver-independent color extensions
+\usepackage{marvosym, wasysym} % More symbols
+\usepackage{rotating} % Rotation tools
+\usepackage{censor} % Facilities for controlling restricted text
+\usepackage{listings}
+%\usepackage{lstlisting} % Environment for non-formatted code, !uses style file!
+\usepackage{pseudocode} % Environment for specifying algorithms in a natural way
+%\usepackage{style/avm} % Environment for f-structures, !uses style file!
+\usepackage{booktabs} % Enhances quality of tables
+\usepackage{bm} % Enhances quality of tables
+\usepackage{tikz-qtree} % Easy tree drawing tool
+\usepackage{booktabs}       % professional-quality tables
+\usepackage{amsfonts}       % blackboard math symbols
+\usepackage{mathtools} % Mathematical typesetting
+\usepackage{nicefrac}       % compact symbols for 1/2, etc.
+\usepackage{microtype}      % microtypography
+\usepackage{cleveref}
+\usepackage{tikz}
+\usepackage{placeins}
+\usepackage{subcaption}
+\usepackage{cancel}
+\input{formulas}
+
+\title{Reading assignment}
+
+% The \author macro works with any number of authors. There are two
+% commands used to separate the names and addresses of multiple
+% authors: \And and \AND.
+%
+% Using \And between authors leaves it to LaTeX to determine where to
+% break the lines. Using \AND forces a line break at that point. So,
+% if LaTeX puts 3 of 4 authors names on the first line, and the last
+% on the second line, try using \AND instead of \And before the third
+% author name.
+
+\author{
+  Maico Timmerman \\
+  Master Artificial Intelligence\\
+  University of Amsterdam\\
+  \texttt{maico.timmerman@gmail.com} \\
+  10542590 \\
+  \And
+  Daan Smedinga\\
+  Master Artificial Intelligence\\
+  University of Amsterdam\\
+  \texttt{TODO email}\\
+  TODO student id
+}
+
+\begin{document}
+% \nipsfinalcopy is no longer used
+
+\maketitle
+
+% \begin{abstract}
+%   The abstract paragraph should be indented \nicefrac{1}{2}~inch
+%   (3~picas) on both the left- and right-hand margins. Use 10~point
+%   type, with a vertical spacing (leading) of 11~points.  The word
+%   \textbf{Abstract} must be centered, bold, and in point size 12. Two
+%   line spaces precede the abstract. The abstract must be limited to
+%   one paragraph.
+% \end{abstract}
+
+\section*{Cloud Computing and Grid Computing 360-Degree Compared}
+
+In this paper an in-depth comparison is made between Grid Computing and Cloud
+Computing. Grids are defined by Ian Foster as 1) coordinated resources that are
+not subject to centralized control, 2) uses standard, open, general-purpose
+protocols and interfaces, and 3) delivers non-trivial qualities of service. The
+first two do not clearly hold for Clouds, while the third does. There is little
+consensus on how to define Clouds, however the author defines them as: ``A
+large-scale distributed computing paradigm that is driven by economies of scale,
+in which a pool of abstracted virtualized dynamically-scalable, managed
+computing power, storage, platforms, and services are delivered on demand to
+external customers over the Internet.''
+To further support these definitions, the author compares Grids and Clouds from
+different perspectives: architecture, security model, business model,
+programming model, virtualization, data model, compute model, provenance and
+applications.
+
+Clouds charge the users using creditcards based on per
+instance-hours, GB-Month of storage, TB / month data transfer, or similar
+metrics. For Grids, mostly found in academia or government labs,  the users
+provide proposals for projects, which are assigned service units (like CPU
+hours) which they can spend. Architecturally, Clouds can be implemented over
+existing Grid technologies. The Grid starting point was to use federated
+resources comprising of compute, storage and network resources. These generally
+heterogeneous and dynamic resources can come from multiple geographically
+distributed institutions: ``Virtual Organizations''. To support these, Grid
+protocol architecture define standard protocols, middleware, toolkits, and
+services with interoperability and security as their primary concerns. Grids
+provide protocols and services at five different layers. 1) The fabric layer are
+the resources types such as compute, storage, etc. 2) Connectivity layer defines
+communication and authentication. 3) Resource layer defined protocols for
+publication, monitoring, accounting and payment. 4) Collective layer capture
+interactions acress collections of resources. 5) Application layer comprises the
+user application built on all the protocols. For Clouds the protocol
+architecture consists of four layers. 1) Fabric layer similar to Grids. 2)
+Unified resource layer containing resource that have been abstracted
+/encapsulated (usually using virtualization). 3) The platform layer consisting
+of a set of specialized tools, middleware, and services to provide development
+and/or deployment. 4) Application layer similar to Grids. Clouds generally
+provide services at three levels. 1) Infrastructure as a Service (IaaS)
+provisioning hardware, software and equipments. 2) Platform as a Service (PaaS)
+provisioning high-level integrated environments. 3). Software as a Service
+(SaaS) delivers special purpose software remotely accessible for the user.
+
+Resources in Grids are often batch-scheduled, where a resource manager process
+requests of users for a number of resources. Based on the user credentials
+requests are processed and accounting is done. Clouds resource model is very
+different, as all resource in the Cloud are shared by all users at the same
+time. This makes providing a good level of QoS a non-trivial task and will
+likely be one of the major challenges in Cloud Computing. Data-wise Clouds and
+Grids face similar issues when the scale of the data grows every year. Moving
+data repeatedly to distant CPUs is becoming a bottleneck. To archive good
+scalability Clouds, Grids, and their applications must distribute data over many
+computers and computations must be steered towards the best place to execute in
+order to minimize communication costs. Critical is the combination of compute
+and resources, as data movement will not scale to the peta-scale datasets and
+could lead to underutilization of raw resources in both Clouds and Grids. While
+Grids often deal with more data and progress has been made in data-aware
+schedulers, however Clouds will face the same issues as the scales of the Clouds
+grow. Virtualization in Clouds is used to provide necessary abstraction between
+fabric and resource overlays. It enables encapsulation, providing better
+security, manageability, and isolation in Clouds. Grids do not rely on
+virtualization as much as Clouds do, as individual organization maintain full
+control of the resources, however there are efforts to use virtualization as
+well.
+
+Monitoring in Clouds is a potential difficulty due to the virtualization. As
+mentioned, Grid resources are not highly abstract as in clouds, making
+monitoring easier. However, it can be argued that monitoring in Clouds is less
+important as users are interacting with a more abstract layer that is
+potentially more sophisticated. Provence refers to the derivation history of a
+data product. It is different from monitoring in the sense that it provides a
+overview of the past and supports the discovery and reproducibility of
+scientific results. Provence in Clouds seems to be more challenging, as data
+needs to be tracked across multiple service providers.
+
+The software written in Grids does not differ fundamentally from traditional
+parallel and distributed environments. Grids often target large scale scientific
+computations and must scale to leverage large number of resources while
+considering reliability and fault tolerance. Clouds seem to consist more of
+mesh-up\'s and scripting, since there is no easy way to integrate services and
+application from various providers.
+
+In conclusion, the author has created an overview of the Cloud- and Grid
+Computing paradigms. While the paper has been written 10 years ago, it gives a
+very good overview of the differences in Clouds and Grids still present today.
+Especially the concluding words of the author regarding the required protocols
+and tools is still relevant today, as currently the tooling for Clouds and Grids
+are advancing quickly.
+
+
+\section*{The Pathologies of Big Data}
+\end{document}
