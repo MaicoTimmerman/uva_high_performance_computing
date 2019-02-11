@@ -1,11 +1,8 @@
 PROGNAME = main.out
 SRCFILES = main.c
 
-NODES = 1 # How many DAS4 nodes
 PROCESSESPERNODE = 4 # How many processes to spawn on one machine.
 
-PRUNARGS = -v -np $(NODES) -$(PROCESSESPERNODE) \
-		   -sge-script $$PRUN_ETC/prun-openmpi
 RUNARGS = 1
 CC = mpicc
 
@@ -17,7 +14,7 @@ LFLAGS = -lm -lrt
 # Do some substitution to get a list of .o files from the given .c files.
 OBJFILES = $(patsubst %.c,%.o,$(SRCFILES))
 
-.PHONY: all run runlocal plot clean dist todo
+.PHONY: all run clean
 
 all: $(PROGNAME)
 
@@ -28,9 +25,6 @@ $(PROGNAME): $(OBJFILES)
 	$(CC) -c $(CFLAGS) -o $@ $<
 
 run: $(PROGNAME)
-	prun $(PRUNARGS) $(PROGNAME) $(RUNARGS)
-
-runlocal: $(PROGNAME)
 	mpirun -n $(PROCESSESPERNODE) $(PROGNAME) $(RUNARGS)
 
 
