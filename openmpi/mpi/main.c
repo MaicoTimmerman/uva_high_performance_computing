@@ -66,7 +66,7 @@ int main(int argc, char **argv) {
     int num_tasks, world_rank;
 
     if (argc < 2) {
-        printf("Usage [%s] [comm_method].\n");
+        printf("Usage [%s] [comm_method].\n", argv[0]);
         printf("\t comm_method: 0 = many-to-many, 1 = ring-topology\n");
     }
 
